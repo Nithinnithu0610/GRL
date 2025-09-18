@@ -1,0 +1,68 @@
+
+# System Architecture Diagram — Zephyr RTOS
+
+```mermaid
+graph TD
+
+    %% Hardware
+    subgraph Hardware
+        CPU["⚙️ MCU/SoC
+        Input: Power-on reset
+        Output: Executes firmware"]
+
+        Peripherals["🔌 Peripherals
+        GPIO, I2C, SPI, UART, Timers, ADC, PWM"]
+    end
+
+    %% Software
+    subgraph Software
+        Kernel["🧩 Zephyr Kernel
+        Input: Threads, ISRs
+        Task: Scheduling, synchronization, timers
+        Output: Deterministic task execution"]
+
+        DeviceModel["📦 Device Model & Drivers
+        Input: Device Tree bindings
+        Task: Init & manage hardware peripherals
+        Output: APIs for subsystems"]
+
+        Subsystems["🔗 Subsystems / Middleware
+        Networking, Bluetooth, USB, FS, Logging"]
+
+        Application["💻 Application Code
+        Input: Developer logic
+        Task: Use kernel & subsystems
+        Output: Product functionality"]
+
+        Logger["📝 Logger
+        Input: Events & performance data
+        Task: Record errors, metrics
+        Output: Logs / traces"]
+    end
+
+    %% Build & Config
+    subgraph Build_Config["🛠️ Build & Configuration"]
+        Kconfig["⚙️ Kconfig
+        Task: Compile-time feature selection"]
+
+        Devicetree["🌳 Device Tree
+        Task: Describe board & peripherals"]
+
+        CMakeWest["📐 CMake + West
+        Task: Build system, module fetch, flash"]
+    end
+
+    %% Connections
+    CPU --> Kernel
+    Kernel --> DeviceModel
+    DeviceModel --> Peripherals
+    Kernel --> Subsystems
+    Subsystems --> Application
+    Application --> Logger
+    Logger -->|Store| Logs["📄 Log Output"]
+
+    Kconfig --> Kernel
+    Devicetree --> DeviceModel
+    CMakeWest -->|Generates| Firmware["📦 Firmware Image"]
+    Firmware -->|Flash| CPU
+```
