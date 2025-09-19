@@ -5,61 +5,63 @@ graph TD
 
     %% Hardware
     subgraph Hardware
-        CPU["⚙️ CPU/GPU
-        Input: Webcam frames
-        Output: Processes inference"]
+        Camera["📷 Camera
+        Input: People showing hands/gestures
+        Output: Live video frames"]
 
-        Webcam["📷 Webcam / Camera
-        Input: Real-time video
-        Output: Frames for detection"]
+        Computer["💻 Computer
+        Input: Video frames
+        Output: Sends frames to software modules"]
     end
 
     %% Software
     subgraph Software
-        FrameCapture["🎥 Frame Capture Module (Python/C++)
-        Input: Webcam frames
-        Task: Capture & preprocess frames
-        Output: Frames to server"]
-
-        LLamaServer["🧩 llama-server with SmolVLM
-        Input: Frames
-        Task: Run inference for hand detection & gestures
-        Output: Detection results"]
-
-        HandDetection["✋ Hand Detection Module
-        Input: Frames
+        OpenCV["🖼️ OpenCV / MediaPipe
+        Input: Video frames
         Task: Detect hands and landmarks
         Output: Bounding boxes & landmarks"]
 
-        HandSide["🖐 Hand Side Identification
-        Input: Hand landmarks
-        Task: Determine Left/Right hand
-        Output: Hand side"]
-
-        FingerCounting["✌ Finger Counting
-        Input: Hand landmarks
-        Task: Count extended fingers
-        Output: Finger count"]
+        HandRecognition["✋ Hand Recognition
+        Input: Hand bounding boxes & landmarks
+        Task: Identify hand side (Left/Right), finger count
+        Output: Hand data"]
 
         GestureRecognition["👍/👎 Gesture Recognition
-        Input: Landmarks & finger count
-        Task: Identify gestures
+        Input: Hand data
+        Task: Recognize gestures (Thumbs Up / Thumbs Down / Other)
         Output: Gesture type"]
 
+        AttendanceManager["📒 Attendance Manager
+        Input: Gesture type + person info
+        Task: Mark attendance using gestures
+        Output: Attendance record"]
+
         Logger["📝 Logger
-        Input: Detection results & performance data
-        Task: Record events and metrics
-        Output: Logs / traces"]
+        Input: System events & performance
+        Task: Record errors, steps, CPU & memory usage
+        Output: Log messages + performance details"]
+    end
+
+    %% Storage
+    subgraph Storage
+        GestureDB["🗂️ Gesture Database
+        Stored: Reference gestures and mappings"]
+
+        CSV["📂 Attendance.csv
+        Stored: Name, ID, Date, Time, Status"]
+
+        LogFile["📄 performance.log
+        Stored: Events, Errors, CPU & Memory usage, Processing time"]
     end
 
     %% Connections
-    Webcam --> FrameCapture
-    FrameCapture --> LLamaServer
-    LLamaServer --> HandDetection
-    HandDetection --> HandSide
-    HandDetection --> FingerCounting
-    FingerCounting --> GestureRecognition
-    HandSide --> GestureRecognition
-    GestureRecognition --> Logger
+    Camera --> Computer
+    Computer --> OpenCV
+    OpenCV --> HandRecognition
+    HandRecognition --> GestureRecognition
+    GestureRecognition --> AttendanceManager
+    HandRecognition -->|Compare with| GestureDB
+    AttendanceManager --> CSV
+    AttendanceManager --> Logger
+    Logger --> LogFile
 ```
-
